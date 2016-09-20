@@ -1,6 +1,7 @@
 package com.riverlake.github.info;
 
 import java.io.Console;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -15,7 +16,7 @@ public class GitHubInfo {
 		githubRepo = new GitHubRepo(log, pwd);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		String login = null;
 		char[] password = null;
 		Console console = System.console();
@@ -25,6 +26,7 @@ public class GitHubInfo {
 		    //System.out.println("Password is: " + String.copyValueOf(password));
 		} else {
 		    // ...  
+			throw new IOException();
 		}
 		GitHubInfo ghi = new GitHubInfo(login, String.copyValueOf(password));
 		System.out.println("Welcome to GitHub RiverLake!");
