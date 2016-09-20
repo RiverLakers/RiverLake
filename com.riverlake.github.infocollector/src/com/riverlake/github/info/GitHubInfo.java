@@ -27,7 +27,7 @@ public class GitHubInfo {
 		    // ...  
 		}
 		GitHubInfo ghi = new GitHubInfo(login, String.copyValueOf(password));
-		System.out.println("数据读取完毕！");
+		System.out.println("Welcome to GitHub RiverLake!");
 		System.out.println("----------------------------------------");
 		try {
 			for (Method method : ghi.githubUser.getClass().getMethods()) {
