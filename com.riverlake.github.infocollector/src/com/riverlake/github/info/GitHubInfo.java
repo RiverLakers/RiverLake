@@ -22,10 +22,11 @@ public class GitHubInfo {
 		Console console = System.console();
 		if (console != null) {
 			login = console.readLine("Enter login: ");
-		    password = console.readPassword("Enter password: ");
-		    //System.out.println("Password is: " + String.copyValueOf(password));
+			password = console.readPassword("Enter password: ");
+			// System.out.println("Password is: " +
+			// String.copyValueOf(password));
 		} else {
-		    // ...  
+			// ...
 			throw new IOException();
 		}
 		GitHubInfo ghi = new GitHubInfo(login, String.copyValueOf(password));
