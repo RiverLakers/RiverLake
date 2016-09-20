@@ -1,8 +1,8 @@
 package com.riverlake.github.info;
 
+import java.io.Console;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Scanner;
 
 import org.eclipse.egit.github.core.Repository;
 
@@ -16,13 +16,17 @@ public class GitHubInfo {
 	}
 
 	public static void main(String[] args) {
-		Scanner scanner = new Scanner(System.in);
-		System.out.println("请输入用户名：");
-		String login = scanner.nextLine();
-		System.out.println("请输入密码：");
-		String pwd = scanner.nextLine();
-		scanner.close();
-		GitHubInfo ghi = new GitHubInfo(login, pwd);
+		String login = null;
+		char[] password = null;
+		Console console = System.console();
+		if (console != null) {
+			login = console.readLine("Enter login: ");
+		    password = console.readPassword("Enter password: ");
+		    //System.out.println("Password is: " + String.copyValueOf(password));
+		} else {
+		    // ...  
+		}
+		GitHubInfo ghi = new GitHubInfo(login, String.copyValueOf(password));
 		System.out.println("数据读取完毕！");
 		System.out.println("----------------------------------------");
 		try {
