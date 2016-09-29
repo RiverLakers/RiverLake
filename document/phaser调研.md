@@ -11,7 +11,7 @@ http://www.apachehaus.com/cgi-bin/download.plx
 
 Apache httpd server是普通的的web服务器，可以在大多数的操作系统上运行，只支持html页面，
 可以通过插件支持php，对于我们的游戏来说，简单的html就可以实现，
-http://www.admin10000.com/document/974.html描述了apache和tomcat的区别
+http://www.admin10000.com/document/974.html 描述了apache和tomcat的区别
 
 总的来说，Phaser是一个不错的选择
 
