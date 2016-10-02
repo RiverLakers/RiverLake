@@ -1,0 +1,63 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 100;
+        }
+    </style>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create });
+
+function preload() {
+
+ 	game.load.json('info', 'https://api.github.com/users/killxin');
+
+ 	game.load.image('avatar', 'https://avatars.githubusercontent.com/u/9050853?v=3');
+
+}
+
+function create() {
+
+    var phaserJSON = game.cache.getJSON('info');
+
+    var content = "Name: " + phaserJSON.name + "\n" +
+				  "Login: " + phaserJSON.login + "\n" +
+				  "Bio: " + phaserJSON.bio + "\n" +
+				  "Location: " + phaserJSON.location + "\n" +
+				  "Company: " + phaserJSON.company + "\n" +
+	              "Email: " + phaserJSON.email + "\n" +
+				  "Blog: " + phaserJSON.blog;
+
+	var index = 0;
+	var delay = 100;
+
+    text = game.add.text(32, 32, '', { font: "15px Consolas", fill: "#19de65" });
+
+    game.time.events.repeat(delay, content.length, 
+    	function(){
+    		text.text = text.text.concat(content[index++]);
+    	}, this);
+
+    game.add.sprite(320,32,"avatar");
+    /*
+    game.time.events.add(delay*1000,
+    	function(){
+    		game.add.sprite(320,32,"avatar");
+    	}, this);
+    */
+
+}
+
+</script>
+
+</body>
+</html>
