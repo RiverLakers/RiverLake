@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Tanks - Part 2</title>
+    <meta charset="utf-8">
+    <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
+</head>
+<body>
+
+    <div id="game"></div>
+
+    <script type="text/javascript">
+
+    var game = new Phaser.Game(992, 480, Phaser.CANVAS, 'game');
+
+    var PhaserGame = function (game) {
+
+        this.player = null;
+
+        this.player2 = null;
+
+        this.background = null;
+
+    };
+
+    PhaserGame.prototype = {
+
+        init: function () {
+
+            this.game.renderer.renderSession.roundPixels = true;
+
+            this.game.world.setBounds(0, 0, 992, 480);
+
+            this.physics.startSystem(Phaser.Physics.ARCADE);
+            this.physics.arcade.gravity.y = 200;
+
+        },
+
+        preload: function () {
+
+            //  We need this because the assets are on Amazon S3
+            //  Remove the next 2 lines if running locally
+            // this.load.baseURL = 'http://files.phaser.io.s3.amazonaws.com/codingtips/issue002/';
+            this.load.crossOrigin = 'anonymous';
+
+            this.load.image('tank', 'assets/tank.png');
+            this.load.image('tank2', 'assets/tank2.png');
+            this.load.image('turret', 'assets/turret.png');
+            this.load.image('turret2', 'assets/turret2.png');
+            this.load.image('bullet', 'assets/bullet.png');
+            this.load.image('background', 'assets/background.png');
+            this.load.image('flame', 'assets/flame.png');
+//            this.load.image('target', 'assets/target.png');
+//            this.load.image('land', 'assets/land.png');
+
+            //  Note: Graphics from Amiga Tanx Copyright 1991 Gary Roberts
+
+        },
+
+        createPlayer: function (isLeft) {
+
+            var player = new Object();
+
+            player.isLeft = isLeft;
+            //  A single bullet that the tank will fire
+            player.bullet = this.add.sprite(0, 0, 'bullet');
+            player.bullet.exists = false;
+            this.physics.arcade.enable(player.bullet);
+
+            if (isLeft) {
+                //  The body of the tank
+                player.tank = this.add.sprite(0, 383, 'tank');
+                //  The turret which we rotate (offset 30x14 from the tank)
+                player.turret = this.add.sprite(player.tank.x + 30, player.tank.y + 14, 'turret');
+            }
+            else {
+                player.tank = this.add.sprite(930, 383, 'tank2');
+                player.turret = this.add.sprite(player.tank.x + 30, player.tank.y + 18, 'turret2');
+                player.turret.angle = -180;
+            }
+            //  When we shoot this little flame sprite will appear briefly at the end of the turret
+            player.flame = this.add.sprite(0, 0, 'flame');
+            player.flame.anchor.set(0.5);
+            player.flame.visible = false;
+
+            var ptx = null;
+            if (isLeft) {
+                ptx = 8;
+            }
+            else {
+                ptx = 650;
+            }
+            //  Used to display the power of the shot
+            player.power = 100;
+            player.powerText = this.add.text(ptx, 8, 'Power: 100', { font: "18px Arial", fill: "#ffff00" });
+            player.powerText.setShadow(1, 1, 'rgba(0, 0, 0, 0.8)', 1);
+            player.powerText.fixedToCamera = true;
+
+            //  Used to display the point of the tank
+            player.locationText = this.add.text(ptx, 30, 'Location: 24,383', { font: "18px Arial", fill: "#ffff00" });
+            player.locationText.setShadow(1, 1, 'rgba(0, 0, 0, 0.8)', 1);
+            player.locationText.fixedToCamera = true;
+
+            // Used to display the last power
+            player.lastPowerText = this.add.text(ptx + 150, 8, 'LastPower: 100', { font: "18px Arial", fill: "#ffffff" });
+            player.lastPowerText.setShadow(1, 1, 'rgba(0, 0, 0, 0.8)', 1);
+            player.lastPowerText.fixedToCamera = true;
+
+            player.hit = 0;
+            player.hitText = this.add.text(ptx, 60, 'Hit: 0', { font: "18px Arial", fill: "#ffff00" });
+            player.hitText.setShadow(1, 1, 'rgba(0, 0, 0, 0.8)', 1);
+            player.hitText.fixedToCamera = true;
+
+            return player;
+
+        },
+
+        create: function () {
+
+            //  Simple but pretty background
+            this.background = this.add.sprite(0, 0, 'background');
+
+            this.player = this.createPlayer(true);
+
+            this.player2 = this.createPlayer(false);
+    
+            //  Some basic controls
+            this.cursors = this.input.keyboard.createCursorKeys();
+            this.fireButton = this.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+            this.fireButton.onUp.add(function(){this.fire(this.player);}, this);
+
+            this.WButton = this.input.keyboard.addKey(Phaser.Keyboard.W);
+            this.AButton = this.input.keyboard.addKey(Phaser.Keyboard.A);
+            this.SButton = this.input.keyboard.addKey(Phaser.Keyboard.S);
+            this.DButton = this.input.keyboard.addKey(Phaser.Keyboard.D);
+            this.fireButton2 = this.input.keyboard.addKey(Phaser.Keyboard.Q);
+            this.fireButton2.onUp.add(function(){this.fire(this.player2);}, this);
+
+        },
+
+        /**
+         * Called by update if the bullet is in flight.
+         *
+         * @method bulletVsLand
+         */        
+        bulletVsLand: function (player) {
+
+            var victim = null;
+            if (player.isLeft){
+                victim = this.player2;
+            }
+            else {
+                victim = this.player;
+            }
+            if (player.bullet.y > player.tank.y + 20 && player.bullet.x >= victim.tank.x && player.bullet.x <= victim.tank.x + 60){
+                player.hit++;
+                player.hitText.text = 'Hit: ' + player.hit;
+                //  And position the flame sprite there
+                player.flame.x = player.bullet.x;
+                player.flame.y = player.bullet.y - 18;
+                player.flame.alpha = 1;
+                player.flame.visible = true;
+                //  Boom
+                this.add.tween(player.flame).to( { alpha: 0 }, 100, "Linear", true);
+                this.removeBullet(player);
+            }
+
+            //  Simple bounds check
+            else if (player.bullet.x < 0 || player.bullet.x > this.game.world.width || player.bullet.y > player.tank.y + 20)
+            {
+                this.removeBullet(player);
+                return;
+            }
+
+        },
+
+        /**
+         * Called by fireButton.onDown
+         *
+         * @method fire
+         */
+        fire: function (player) {
+
+            if (player.bullet.exists)
+            {
+                return;
+            }
+
+            //  Re-position the bullet where the turret is
+            player.bullet.reset(player.turret.x, player.turret.y);
+
+            //  Now work out where the END of the turret is
+            var p = new Phaser.Point(player.turret.x, player.turret.y);
+            p.rotate(p.x, p.y, player.turret.rotation, false, 34);
+
+            //  And position the flame sprite there
+            player.flame.x = p.x;
+            player.flame.y = p.y;
+            player.flame.alpha = 1;
+            player.flame.visible = true;
+
+            //  Boom
+            this.add.tween(player.flame).to( { alpha: 0 }, 100, "Linear", true);
+
+            //  So we can see what's going on when the bullet leaves the screen
+            this.camera.follow(player.bullet);
+
+            //  Our launch trajectory is based on the angle of the turret and the power
+            this.physics.arcade.velocityFromRotation(player.turret.rotation, player.power, player.bullet.body.velocity);
+
+        },
+
+        /**
+         * Removes the bullet, stops the camera following and tweens the camera back to the tank.
+         * Have put this into its own method as it's called from several places.
+         *
+         * @method removeBullet
+         */
+        removeBullet: function (player, hasExploded) {
+
+            if (typeof hasExploded === 'undefined') { hasExploded = false; }
+
+            player.bullet.kill();
+            this.camera.follow();
+
+            var delay = 1000;
+
+            if (hasExploded)
+            {
+                delay = 2000;
+            }
+
+            this.add.tween(this.camera).to( { x: 0 }, 1000, "Quint", true, delay);
+
+            player.lastPowerText.text = 'LastPower: ' + player.power;
+            player.power = 100;
+            player.powerText.text = 'Power: 100';
+
+        },
+
+        /**
+         * Core update loop. Handles collision checks and player input.
+         *
+         * @method update
+         */
+        update: function () {
+
+            //  If the bullet is in flight we don't let them control anything
+            if (this.player.bullet.exists)
+            {
+                //  Bullet vs. the land
+                this.bulletVsLand(this.player);
+            }
+            else
+            {
+                if (this.fireButton.isDown && this.player.power < 600)
+                {
+                    this.player.power += 5;
+                }
+                //  Update the text
+                this.player.powerText.text = 'Power: ' + this.player.power;
+//            }
+                /*
+                //  Allow them to set the power between 100 and 600
+                if (this.cursors.left.isDown && this.power > 100)
+                {
+                    this.power -= 2;
+                }
+                else if (this.cursors.right.isDown && this.power < 600)
+                {
+                    this.power += 2;
+                }
+*/
+                //  Allow them to set the angle, between -90 (straight up) and 0 (facing to the right)
+                if (this.cursors.up.isDown && this.player.turret.angle > -90)
+                {
+                    this.player.turret.angle--;
+                }
+                else if (this.cursors.down.isDown && this.player.turret.angle < 0)
+                {
+                    this.player.turret.angle++;
+                }
+
+                //  Update the text
+//                this.powerText.text = 'Power: ' + this.power;
+
+                if (this.cursors.left.isDown && this.player.tank.x >= 2)
+                {
+                    this.player.turret.x -= 2;
+                    this.player.tank.x -= 2;
+                //    this.camera.follow(this.tank);
+                }
+                else if (this.cursors.right.isDown && this.player.tank.x < this.player2.tank.x - 60)
+                {
+                    this.player.turret.x += 2;
+                    this.player.tank.x += 2;
+                //    this.camera.follow(this.tank);
+                }
+
+                this.player.locationText.text = 'Location: ' + this.player.tank.x + "," + this.player.tank.y;
+            }
+
+            if (this.player2.bullet.exists)
+            {
+                this.bulletVsLand(this.player2);
+            }
+            else
+            {
+                if (this.fireButton2.isDown && this.player2.power < 600)
+                {
+                    this.player2.power += 5;
+                }
+                //  Update the text
+                this.player2.powerText.text = 'Power: ' + this.player2.power;
+
+                //  Allow them to set the angle, between -180 (straight up) and -90 (facing to the right)
+                if (this.WButton.isDown && this.player2.turret.angle < -90)
+                {
+                    this.player2.turret.angle++;
+                }
+                else if (this.SButton.isDown && this.player2.turret.angle > -180)
+                {
+                    this.player2.turret.angle--;
+                }
+
+                if (this.AButton.isDown && this.player2.tank.x >= this.player.tank.x + 60)
+                {
+                    this.player2.turret.x -= 2;
+                    this.player2.tank.x -= 2;
+                }
+                else if (this.DButton.isDown && this.player2.tank.x < this.game.world.width - 60)
+                {
+                    this.player2.turret.x += 2;
+                    this.player2.tank.x += 2;
+                }
+
+                this.player2.locationText.text = 'Location: ' + this.player2.tank.x + "," + this.player.tank.y;
+            }
+
+        }
+
+    };
+
+    game.state.add('Game', PhaserGame, true);
+
+    </script>
+
+    <a href="http://phaser.io"><img src="http://files.phaser.io.s3.amazonaws.com/codingtips/issue001/phaser-tips-header1.png" title="Phaser Coding Tips Weekly" style="margin-top: 8px" /></a>
+
+</body>
+</html>
