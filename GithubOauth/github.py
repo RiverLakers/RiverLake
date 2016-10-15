@@ -1,7 +1,7 @@
-# github.py
+#!/usr/bin/env python3
+
 from flask import (Flask, flash, request, redirect,
     render_template, url_for, session)
-
 
 from rauth.service import OAuth2Service
 
