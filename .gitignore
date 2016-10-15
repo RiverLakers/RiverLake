@@ -1,0 +1,6 @@
+# Python module file
+*.pyc
+__pycache__/
+
+# Python virtual environment directory
+venv/
