@@ -1,0 +1,148 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+        @font-face {
+        	font-family: 'iconfont';
+    		src: url('iconfont.eot'); /* IE9*/
+    		src: url('iconfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    		url('iconfont.woff') format('woff'), /* chrome、firefox */
+    		url('iconfont.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+    		url('iconfont.svg#iconfont') format('svg'); /* iOS 4.1- */
+		}
+		.iconfont{
+    		font-family:"iconfont" !important;
+    		font-size:60px;font-style:normal;
+    		-webkit-font-smoothing: antialiased;
+    		-webkit-text-stroke-width: 0.2px;
+   		 	-moz-osx-font-smoothing: grayscale;
+   		}
+    </style>
+</head>
+
+<body>
+	<div class="main">
+        <table>
+        	<tr>
+        		<td>
+        			<div class="icon iconfont">&#xe673;</i>
+                </td>
+                <td>
+        			<div class="icon iconfont">&#xe601;</i>
+                </td>
+            </tr>
+            	<td>
+        			<div class="icon iconfont">&#xe72d;</i>
+                </td>
+                <td>
+        			<div class="icon iconfont">&#xe916;</i>
+                </td>
+            <tr>
+            </tr>
+        </table>
+	</div>
+<script type="text/javascript">
+
+var game = new Phaser.Game(900, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create/*,render:render*/});
+
+function preload() {
+	game.load.image('avatar', 'assets/夕阳武士.png');
+	game.load.image('cpp', 'assets/language/C++.png');
+	game.load.image('java', 'assets/language/java.png');
+	game.load.image('js', 'assets/language/javascript.png');
+	game.load.image('php', 'assets/language/php.png');
+	game.load.image('python', 'assets/language/python.png');
+	game.load.image('ruby', 'assets/language/ruby.png');
+	game.load.image('c', 'assets/language/C.png');
+	game.load.image('perl', 'assets/language/perl.png');
+	game.load.image('hammer', 'assets/weapon/hammer.png');
+	game.load.image('android', 'assets/weapon/sey-android.png');
+	game.load.image('ios', 'assets/weapon/sey-ios.png');
+	game.load.image('spanner', 'assets/weapon/扳手.png');
+	game.load.image('knife', 'assets/weapon/刀.png');
+	game.load.image('axe', 'assets/weapon/刀剑斧.png');
+	game.load.image('sword', 'assets/weapon/剑.png');
+	game.load.image('gun', 'assets/weapon/枪支.png');
+}
+
+function create() {
+
+	var languageList = new Array(
+		'cpp','java','js','php','python','ruby','c','perl'
+	);
+
+	var weaponList = new Array(
+		'hammer','android','ios','spanner','knife','axe','sword','gun'
+	);
+
+	var item = null;
+	var i = 0;
+	for(i=0; i<languageList.length;i++) {
+		item = game.add.sprite(50*i, 10, languageList[i]);
+		item.width = 40;
+		item.height = 40;
+	}
+
+	for(i=0; i<languageList.length;i++) {
+		item = game.add.sprite(50*i, 60, weaponList[i]);
+		item.width = 40;
+		item.height = 40;
+	}
+	/*
+    // Add some items to left side, and set a onDragStop listener
+    // to limit its location when dropped.
+
+    var item;
+
+    for (var i = 0; i < 6; i++)
+    {
+        // Directly create sprites on the left group.
+        item = game.add.sprite(90, 90 * i, 'item', i);
+
+        // Enable input detection, then it's possible be dragged.
+        item.inputEnabled = true;
+
+        // Make this item draggable.
+        item.input.enableDrag();
+        
+        // Then we make it snap to left and right side,
+        // also we make it only snap when released.
+        item.input.enableSnap(90, 90, false, true);
+
+        // Limit drop location to only the 2 columns.
+        item.events.onDragStop.add(fixLocation);
+    }
+}
+
+function render() {
+
+    game.debug.text('Group Left.', 100, 560);
+    game.debug.text('Group Right.', 280, 560);
+
+}
+
+function fixLocation(item) {
+
+    // Move the items when it is already dropped.
+    if (item.x < 90) {
+        item.x = 90;
+    }
+    else if (item.x > 180 && item.x < 270) {
+        item.x = 180;
+    }
+    else if (item.x > 360) {
+        item.x = 270;
+    }
+*/
+}
+
+</script>
+
+</body>
+</html>

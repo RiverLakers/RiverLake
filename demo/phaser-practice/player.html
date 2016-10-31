@@ -1,0 +1,197 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 100;
+        }
+    </style>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+/*Add Upadte*/
+var game = new Phaser.Game(1200, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create ,update: update ,render: render});
+
+var debug = null;
+
+var locations = null;
+var countries;
+var player = null;
+var cursor;
+
+function preload() {
+
+ 	game.load.json('info', 'https://api.github.com/users/killxin');
+
+ 	game.load.image('avatar', 'https://avatars.githubusercontent.com/u/9050853?v=3');
+
+    game.load.image('java', 'assets/language/java.png');
+    game.load.image('js', 'assets/language/javascript.png');
+    game.load.image('php', 'assets/language/php.png');
+    game.load.image('python', 'assets/language/python.png');
+    game.load.image('ruby', 'assets/language/ruby.png');
+
+    game.load.image('knife', 'assets/weapon/刀.png');
+    game.load.image('axe', 'assets/weapon/刀剑斧.png');
+    game.load.image('sword', 'assets/weapon/剑.png');
+    game.load.image('gun', 'assets/weapon/枪支.png');
+
+    game.load.image('map', 'assets/火影地图2.png');
+
+    game.load.json('location', 'assets/火影地图2坐标.json');
+
+    game.load.spritesheet("dude","assets/dude.png",32,48);
+
+}
+
+function create() {
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    // Sets background color to white.
+    game.stage.backgroundColor = '#ffffff';
+
+    var avatar = game.add.image(30,30,"avatar");
+    avatar.width = 150;
+    avatar.height = 150;
+
+    var phaserJSON = game.cache.getJSON('info');
+
+    var content = "Name: " + phaserJSON.name + "\n" +
+				  "Login: " + phaserJSON.login + "\n" +
+				  "Bio: " + phaserJSON.bio + "\n" ;//+
+	//			  "Location: " + phaserJSON.location + "\n" +
+	//			  "Company: " + phaserJSON.company + "\n" +
+	//              "Email: " + phaserJSON.email + "\n" +
+	//			  "Blog: " + phaserJSON.blog;
+
+	var index = 0;
+	var delay = 100;
+
+    var text = game.add.text(30, 200, '', { font: "15px Consolas", fill: "#000000" });
+    text.text = content;
+/*
+    game.time.events.repeat(delay, content.length, 
+    	function(){
+    		text.text = text.text.concat(content[index++]);
+    	}, this);
+*/
+//  Create a BitmapData just to plot the points to
+    var bmd = game.add.bitmapData(game.width, game.height);
+    game.add.text(30, 280, '攻击力：', { font: "15px 微软雅黑", fill: "#000000" });
+    bmd.rect(90, 280, 300, 20, '#000000');
+    game.add.text(30, 310, '防御力：', { font: "15px 微软雅黑", fill: "#000000" });
+    bmd.rect(90, 310, 100, 20, '#000000');
+    bmd.addToWorld();
+
+    var languageList = new Array(
+        'java','js','php','python','ruby'
+    );
+    game.add.text(30, 340, '武功：', { font: "15px 微软雅黑", fill: "#000000" });
+    var item = null;
+    for(var i=0; i<languageList.length;i++) {
+        item = game.add.sprite(30+50*i, 370, languageList[i]);
+        item.width = 40;
+        item.height = 40;
+    }
+
+    var weaponList = new Array(
+        'knife','axe','sword','gun'
+    );
+    game.add.text(30, 420, '武器：', { font: "15px 微软雅黑", fill: "#000000" });
+    for(var i=0; i<languageList.length;i++) {
+        item = game.add.sprite(30+50*i, 450, weaponList[i]);
+        item.width = 40;
+        item.height = 40;
+    }
+
+//    bmd.rect(420, 30, 700, 500, '#000000');
+//    bmd.addToWorld();
+
+    var map = game.add.image(420, 30, "map");//800x450
+    countries = game.cache.getJSON('location').countries;
+    locations = new Array(countries.length);
+    for(var i=0;i<countries.length;i++){
+        locations[i] = new Object();
+        locations[i].location = new Object();
+        locations[i].location.x = 420+countries[i].dotOff[0];
+        locations[i].location.y = 30+countries[i].dotOff[1];
+        var x = 420+countries[i].nameOff[0];
+        var y = 30+countries[i].nameOff[1];
+        var text = game.add.text(x,y,countries[i].name,{ font: "25px 微软雅黑", fill: "#000000" });
+        text.inputEnabled = true;
+        /*添加点击小手*/
+        text.input.useHandCursor = true;             
+        text.locationX = locations[i].location.x;
+        text.locationY = locations[i].location.y;
+        text.events.onInputDown.add(moveToPlace, this);
+        locations[i].text = text;
+    }
+    debug = game.add.text(30,500,420+countries[0].dotOff[0],{ font: "15px 微软雅黑", fill: "#000000" });
+
+    /*添加玩家及移动动作*/
+    player = game.add.sprite(420+countries[0].dotOff[0], 30+countries[0].dotOff[1], 'dude');
+    game.physics.arcade.enable(player);
+    /*左移右移不动三个动作*/
+    player.animations.add('left', [0, 1, 2, 3], 10, true);
+    player.animations.add('right', [5, 6, 7, 8], 10, true);
+    player.animations.add('mid', [4], 0, true)
+    player.frame = 4;
+    /*设置player当前所处的国家*/
+    player.state = 0;
+    cursor = game.input.keyboard.createCursorKeys();
+}
+
+function update(){
+	/*每次判断是否到达*/
+	for(var i = 0;i < countries.length;i++){
+		var x = 420+countries[i].dotOff[0];
+        var y = 30+countries[i].dotOff[1];
+		if(Math.abs(player.x - x) <= 2 && Math.abs(player.y - y) <= 2 && player.state != i){
+			player.body.velocity.x = 0;
+			player.body.velocity.y = 0;
+			player.frame = 4;
+			player.play('mid');
+			player.state = i;
+		}
+	}
+}
+
+//player移动
+function moveToPlace(item){
+	if(null != debug){
+		if(item.locationX > player.x){
+			player.play('right');
+			game.physics.arcade.moveToXY(player,item.locationX,item.locationY,200);
+			
+		}
+		else if(item.locationX < player.x){
+			player.play('left');
+			game.physics.arcade.moveToXY(player,item.locationX,item.locationY,200);
+		}
+		else{
+			player.frame = 4;
+		}
+	}
+}
+
+function locationClick(item){
+    if(null != debug){
+       debug.text = debug.text.concat(item.location);
+    }
+}
+
+function render(){
+	//game.debug.text(player.x+ "," + player.y, 30, 500);
+
+}
+
+</script>
+
+</body>
+</html>

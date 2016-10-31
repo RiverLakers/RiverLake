@@ -1,0 +1,9 @@
+﻿{
+	"countries":[
+		{"name":"土","nameOff":[80,60],"dotOff":[210,150]},
+		{"name":"风","nameOff":[100,350],"dotOff":[160,400]},
+		{"name":"火","nameOff":[380,330],"dotOff":[350,320]},
+		{"name":"雷","nameOff":[580,80],"dotOff":[570,140]},
+		{"name":"水","nameOff":[630,260],"dotOff":[660,350]}
+	]
+}
