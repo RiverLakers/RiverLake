@@ -1,0 +1,136 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Github RiverLake</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(1200, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+function preload() {
+	game.load.image("sky","assets/cartoon/sky.png");
+	game.load.image("aid","assets/cartoon/firstaid.png");
+	game.load.image("star","assets/cartoon/star.png");
+    game.load.image('button', 'assets/cartoon/star.png');
+	game.load.spritesheet("diamond","assets/cartoon/diamond.png",32,48);
+    //game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+}
+
+var button1;
+var button2;
+var objects_on;
+var pic;
+var objects;
+var sprite1,sprite2,sprite3;
+var BeiBao;
+var ZhuangBei;
+var bag_num = 0;
+
+function create() {
+
+    button1 = game.add.sprite(0, 0, 'button');
+    button1.inputEnabled = true;
+    button1.input.useHandCursor = true;
+    button1.events.onInputDown.add(skip_bar,this);
+    
+}
+
+function skip_bar(){
+    pic = game.add.sprite(0, 0, 'sky');
+    //pic.anchor.set(0.5);
+    pic.scale.set(0.7);
+    pic.alignIn(game.world.bounds,Phaser.CENTER);
+
+    objects = game.add.group();
+    objects_on = game.add.group();
+
+    sprite1 = objects.create(0, 0, 'aid');
+    sprite1.scale.set(2);
+    sprite1.inputEnabled = true;
+    sprite1.input.useHandCursor = true;
+    sprite1.events.onInputDown.add(addToBag, this);
+
+    sprite2 = objects.create(0, 0, 'star');
+    sprite2.scale.set(2.5);
+    sprite2.inputEnabled = true;
+    sprite2.input.useHandCursor = true;
+    sprite2.events.onInputDown.add(addToBag, this);
+
+    sprite3 = objects.create(0, 0, 'diamond');
+    sprite3.scale.set(2);
+    sprite3.inputEnabled = true;
+    sprite3.input.useHandCursor = true;
+    sprite3.events.onInputDown.add(addToBag, this);
+
+
+    sprite1.alignIn(pic,Phaser.TOP_LEFT, -150, -10);
+    sprite2.alignIn(pic,Phaser.TOP_LEFT, -250, -15);
+    sprite3.alignIn(pic,Phaser.TOP_LEFT, -350, -15);
+
+    //BeiBao.alignIn(pic,Phaser.TOP_CENTER, -100, -30);
+    //ZhuangBei.alignIn(pic,Phaser.TOP_CENTER,-100, -300);
+    BeiBao = game.add.text(32, 32, "背包:", { font: "30px Consolas", fill: "#000000"});
+    ZhuangBei = game.add.text(32, 64, "装备:", { font: "30px Consolas", fill: "#000000" });
+    BeiBao.anchor.set(0.5);
+    ZhuangBei.anchor.set(0.5);
+    BeiBao.x = Math.floor(pic.x + pic.width / 8);
+    BeiBao.y = Math.floor(pic.y + pic.height / 8);
+    ZhuangBei.x = Math.floor(pic.x + pic.width / 8);
+    ZhuangBei.y = Math.floor(pic.y + pic.height * 7 / 8);
+
+    button2 = game.add.sprite(0, 50, 'button');
+    button2.inputEnabled = true;
+    button2.input.useHandCursor = true;
+    button2.events.onInputDown.add(destroy_bar,this);
+    button2.alignIn(pic,Phaser.TOP_RIGHT,0,0);
+}
+
+function update() {
+   
+}
+
+function addToBag(sprite){
+	var str = sprite.key;
+	
+    if(bag_num < 4){
+	   var s = objects_on.create(0,0,str);
+        s.scale.set(2);
+        s.inputEnabled = true;
+        s.input.useHandCursor = true;
+        s.alignIn(pic,Phaser.TOP_LEFT,-150 - bag_num * 100,-320);
+        s.events.onInputDown.add(deleteFromBag, this);
+        bag_num++;
+    }
+    else{
+        alert("装备栏已满");
+    }
+}
+
+function deleteFromBag(sprite){
+    sprite.kill();
+    bag_num--;
+}
+
+function destroy_bar(){
+    //sky.destroy();
+    objects.destroy();
+    objects_on.destroy();
+    ZhuangBei.destroy();
+    BeiBao.destroy();
+    button2.destroy();
+    pic.destroy();
+}
+
+</script>
+
+</body>
+</html>

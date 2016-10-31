@@ -36,7 +36,7 @@ def index():
 def login():
     redirect_uri = url_for('authorized', next=request.args.get('next') or
         request.referrer or None, _external=True)
-    print(redirect_uri)
+    print('redirect_uri:', redirect_uri)
     # More scopes http://developer.github.com/v3/oauth/#scopes
     params = {'redirect_uri': redirect_uri, 'scope': 'user'}
     print(github.get_authorize_url(**params))
@@ -58,9 +58,14 @@ def authorized():
         scope='user,public_repo')
 
     auth = github.get_auth_session(data=data)
-    print(auth.access_token)
+    print('access_token:', auth.access_token)
 #    session['token'] = auth.access_token
-    return redirect('https://api.github.com/user?access_token='+auth.access_token)
+#    return redirect('https://api.github.com/user?access_token='+auth.access_token)
+    return redirect('/game')
+
+@app.route('/game')
+def game():
+    return render_template('game.html')
 
 if __name__ == '__main__':
     app.run()
